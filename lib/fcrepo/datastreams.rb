@@ -1,0 +1,3 @@
+module Fcrepo::Datastreams
+
+end

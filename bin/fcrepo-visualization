@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+
+require 'fcrepo-visualization'
+require "fcrepo-visualization/version"
+require 'smart_colored/extend'
+require 'trollop'
+
+opts = Trollop::options do
+  version "fcrepo-visualization #{Fcrepo::Visualization::VERSION} (c) 2011 Chris Beer"
+  banner <<-EOS
+    Pretty-print metadata about a Fedora object
+
+    Usage:
+      fcrepo-visualization [options] PID
+  EOS
+
+  opt :user, "Fedora User", :default => 'fedoraAdmin'
+  opt :pass, "Fedora Password", :default => 'fedora'
+  opt :url, "Fedora Url", :default => 'http://localhost:8983/fedora'
+end
+
+pid = ARGV.first
+
+Fcrepo::Visualization.init! opts
+
+obj = Rubydora.repository.find pid
+
+print "#{obj.pid.red.bold} (#{obj.state})\n".underline
+print obj.label + "\n" if obj.label
+print obj.models.map { |model| model.magenta }.join("\n")
+print "\n\n"
+
+print "Datastreams:\n".bold.underline
+print obj.datastreams.map.sort_by { |key, ds| ds.dsid }.map { |key, ds| "#{ds.dsid.blue.cyan} / #{ ds.mimeType.blue} (#{ ds.controlGroup.yellow }) #{ ds.dsLabel }"  }.join("\n")
+print "\n\n"
+
+print "Relations:\n".bold.underline
+Rubydora::RelationshipsMixin::RELS_EXT.map do |key, value|
+  objs = obj.send(key)
+  next if objs.empty?
+  print "#{value}\n".underline
+  print objs.map { |x| x.pid }.join("\n")
+  print "\n"
+end
+
+print obj.visualization if obj.respond_to? :visualization
+
+print "\n"
