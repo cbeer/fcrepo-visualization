@@ -1,7 +1,7 @@
 module Fcrepo::Datastreams::DsCompositeModel
   def visualization
 "DS-COMPOSITE-MODEL".green.underline + "\n" +
-   type_model.map { |id, h| "#{id.cyan} / #{ h[:mime].blue } h[:title] " }.join("\n") 
+   type_model.map { |id, h| "#{id.cyan} / #{ h[:mime].blue } #{h[:title]} " }.join("\n") 
   end
 
   def type_model
